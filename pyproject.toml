@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "myproject"
+version = "0.1.0"
+description = "Scalable, SOLID Python service"
+authors = ["Bạn <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.95.0"
+uvicorn = {extras = ["standard"], version = "^0.22.0"}
+pydantic = "^2.0"
+sqlalchemy = "^2.1"
+asyncpg = "^0.27"
+databases = "^0.6.0"       
+aioredis = "^2.0"
+httpx = "^0.24"
+prometheus-client = "^0.16"
+loguru = "^0.7"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.4"
+pytest-asyncio = "^0.21"
+black = "^24.1"
+isort = "^6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,75 @@
+services:
+  gateway:
+    container_name: gateway
+    image: traefik:3.3.6
+    restart: always
+    labels:
+      - "traefik.enable=false"
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # - --log.level=DEBUG
+      # - "--api.insecure=true"
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  hasura:
+    container_name: hasura
+    image: hasura/graphql-engine:v2.48.6
+    ports:
+      - "8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hasura-https.rule=Host(`hasura${ROOT_DOMAIN}`)"
+      - "traefik.http.routers.hasura-https.entrypoints=websecure"
+      - "traefik.http.routers.hasura-https.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hasura-http.rule=Host(`hasura${ROOT_DOMAIN}`)"
+      - "traefik.http.routers.hasura-https.service=hasura"
+      - "traefik.http.routers.hasura-http.service=hasura"
+      - "traefik.http.services.hasura.loadbalancer.server.port=8080"
+    volumes:
+      - ./hasura/migrations:/hasura-migrations
+      - ./hasura/metadata:/hasura-metadata
+    restart: always
+    environment:
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: ${HASURA_METADATA_DATABASE_URL}
+      DATA_DATABASE_URL: ${DATA_DATABASE_URL}
+      NOTIFICATION_DATABASE_URL: ${NOTIFICATION_DATABASE_URL}
+      CONVERSATION_DATABASE_URL: ${CONVERSATION_DATABASE_URL}
+      ECOMMERCE_DATABASE_URL: ${ECOMMERCE_DATABASE_URL}
+      CRM_DATABASE_URL: ${CRM_DATABASE_URL}
+      GEO_DATABASE_URL: ${GEO_DATABASE_URL}
+      CMS_DATABASE_URL: ${CMS_DATABASE_URL}
+      WALLET_DATABASE_URL: ${WALLET_DATABASE_URL}
+      HRM_DATABASE_URL: ${HRM_DATABASE_URL}
+      PROJECT_DATABASE_URL: ${PROJECT_DATABASE_URL}
+      ## enable the console served by server
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: http-log, webhook-log, query-log, websocket-log
+      HASURA_GRAPHQL_LIVE_QUERIES_MULTIPLEXED_REFETCH_INTERVAL: 3000
+      HASURA_GRAPHQL_LIVE_QUERIES_MULTIPLEXED_BATCH_SIZE: 200
+      ## enable debugging mode. It is recommended to disable this in production
+      HASURA_GRAPHQL_DEV_MODE: ${DEV_MODE}
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_ADMIN_SECRET}
+      HASURA_GRAPHQL_AUTH_HOOK: http://webhook:8080/verify-token
+      HASURA_GRAPHQL_AUTH_HOOK_MODE: POST
+      WEBHOOK_BASE_URL: http://webhook:8080
+
+  webhook:
+    container_name: webhook
+    restart: always
+    image: webhook
+    ports:
+      - "8080"
+    # volumes:
+    #   - ./certs/google-cert.json:/google-cert.json
+    environment:
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_CHECKSUM: ${JWT_CHECKSUM:-false}
+      ENVIRONMENT: ${ENVIRONMENT}
+      LOG_LEVEL: ${LOG_LEVEL}
+      
+volumes:
+  db_data:

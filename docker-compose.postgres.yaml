@@ -1,0 +1,36 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgis/postgis:14-master
+    restart: always
+    labels:
+      - "traefik.enable=false"
+    command:
+      - "-cshared_preload_libraries=postgis-3,pg_stat_statements"
+      - "-cpg_stat_statements.max=10000"
+      - "-cpg_stat_statements.track=all"
+      - "-cmax_connections=200"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./scripts/bootstrap:/bootstrap:ro
+      - ./scripts/docker-entrypoint-initdb.d/000_createdb.sql:/docker-entrypoint-initdb.d/000_createdb.sql
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    shm_size: ${POSTGRES_SHM_SIZE}
+    ports:
+      - "5432:5432"
+
+  hasura:
+    depends_on:
+      - "postgres"
+    environment:
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+      DATA_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/database
+
+volumes:
+  db_data:

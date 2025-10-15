@@ -1,0 +1,33 @@
+# yaml refs
+x-refs:
+  common_config: &common_config
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+
+services:
+  gateway:
+    image: gateway
+    <<: *common_config
+    build:
+      context: .
+      dockerfile: ./services/gateway/Dockerfile
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    ports:
+      - "80:80"
+      - "443:443"
+
+  hasura:
+    <<: *common_config
+
+  webhook:
+    <<: *common_config
+    image: webhook
+    build:
+      context: .
+      dockerfile: ./src/webhook/Dockerfile
+    environment:
+      LOG_LEVEL: info
+
