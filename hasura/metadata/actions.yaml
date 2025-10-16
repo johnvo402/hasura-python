@@ -1,6 +1,14 @@
-actions: []
+actions:
+  - name: login
+    definition:
+      kind: synchronous
+      handler: '{{WEBHOOK_BASE_URL}}/action'
+    permissions:
+      - role: anonymous
 custom_types:
-    enums: []
-    input_objects: []
-    objects: []
-    scalars: []
+  enums: []
+  input_objects:
+    - name: LoginInput
+  objects:
+    - name: LoginOutput
+  scalars: []

@@ -1,0 +1,16 @@
+type Mutation {
+  login(
+    data: LoginInput!
+  ): LoginOutput
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+type LoginOutput {
+  accessToken: String!
+  refeshToken: String!
+}
+

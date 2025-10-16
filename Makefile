@@ -1,9 +1,9 @@
 .EXPORT_ALL_VARIABLES:
 
 REGISTRY ?= nexlab
-PROJECT ?= $(shell basename $(PWD))
+PROJECT ?= hasura-python
 VERSION ?= $(shell date +"%Y%m%d")
-TAG ?= $(shell ./scripts/get-version.sh)
+TAG ?= $(shell git describe --tags --always --dirty)
 GIT_COMMIT ?= $(shell git rev-parse HEAD)
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 ENV_FILE ?= .env
@@ -45,6 +45,9 @@ down:
 
 console:
 	./scripts/console.sh
+
+generate:
+	./scripts/gen-schema.sh
 
 bootstrap:
 	./scripts/bootstrap/bootstrap.sh

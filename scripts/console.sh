@@ -1,11 +1,16 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -eo pipefail
-
 ROOT="$(dirname "${BASH_SOURCE[0]}")/.."
 cd $ROOT
 
-CONTROLLER_HOST=${CONTROLLER_URL%"/v1/graphql"}
-cd $ROOT/services/controller
+if [ -f "$ROOT/.env" ]; then
+  export $(grep -v '^#' "$ROOT/.env" | xargs)
+fi
+ROOT="$(dirname "${BASH_SOURCE[0]}")/.."
+cd $ROOT
 
-hasura console --skip-update-check --admin-secret $CONTROLLER_ADMIN_SECRET --endpoint $CONTROLLER_HOST
+HASURA_HOST=${HASURA_BASE_URL%"/v1/graphql"}
+cd $ROOT/hasura
+
+hasura console --skip-update-check --admin-secret $HASURA_ADMIN_SECRET --endpoint $HASURA_HOST

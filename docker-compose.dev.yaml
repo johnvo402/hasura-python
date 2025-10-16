@@ -15,11 +15,18 @@ services:
 
   webhook:
     image: python:3.12-slim
-    command: "python /app/src/webhook/server.py"
+    command: >
+      /bin/bash -c "
+        apt-get update &&
+        apt-get install -y curl build-essential &&
+        curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python3 - &&
+        export PATH=/opt/poetry/bin:/usr/local/bin:/usr/bin:/bin &&
+        cd /app &&
+        poetry install --no-root &&
+        poetry run uvicorn src.webhook.main:app --reload --host 0.0.0.0 --port 8080
+      "
     working_dir: /app
     volumes:
-      - ./src/webhook:/app/src/webhook:ro
-      - ./pyproject.toml:/app/pyproject.toml:ro
-      - ./poetry.lock:/app/poetry.lock:ro
+      - .:/app
     environment:
       LOG_LEVEL: debug
