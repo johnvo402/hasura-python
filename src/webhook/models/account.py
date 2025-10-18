@@ -23,13 +23,15 @@ class Account(Base):
         hashed = bcrypt.hashpw(plain_password.encode('utf-8'), salt)
         self.password_hash = hashed.decode('utf-8')
 
-    def verify_password(self, plain_password: str) -> bool:
-        """Verify the password"""
-        return bcrypt.checkpw(
-            plain_password.encode('utf-8'), 
-            self.password_hash.encode('utf-8')
-        )
     
     def update_last_login(self):
         """Update the last login timestamp"""
         self.last_login_at = func.now()
+    
+    @staticmethod
+    def verify_password_hash(password_hash: str, plain_password: str) -> bool:
+        """Verify the password against a hash (static method)"""
+        return bcrypt.checkpw(
+            plain_password.encode('utf-8'), 
+            password_hash.encode('utf-8')
+        )
