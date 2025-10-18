@@ -9,31 +9,35 @@ from ...utils.database import get_db
 from ...utils.logger import get_logger
 from ...models.account import Account
 from ...config import settings
+from ...auth.context import current_account
+from ...utils.result import Result
+
 
 logger = get_logger(__name__)
 
-async def handle_login_action(data: LoginData) -> LoginActionResponse:
+async def handle_login_action(data: LoginData) -> Result[LoginActionResponse]:
     """Handle login action"""
-    logger.info(f"Login attempt for user: {data.username}")
     
     with next(get_db()) as db:
         # Query user from database
         user = db.query(Account).filter(Account.username == data.username).first()
-        print("User fetched from DB:", user.password_hash if user else "No user found")
         # Check if user exists and validate password
         if not user or not user.verify_password(data.password):
-            logger.warning(f"Failed login attempt for user: {data.username}")
-            raise HTTPException(
-                status_code=401,
-                detail="Invalid username or password"
+            return Result.fail(
+                message="Invalid username or password",
+                code=401,
+                path="webhook.login_action",
+                location="validate_credentials"
             )
         
         # Check if account is active
         if not user.is_active:
             logger.warning(f"Login attempt for disabled account: {data.username}")
-            raise HTTPException(
-                status_code=403,
-                detail="Account is disabled"
+            return Result.fail(
+                message="Account is disabled",
+                code=403,
+                path="webhook.login_action",
+                location="check_account_active"
             )
         
         # Update last login time
@@ -58,8 +62,14 @@ async def handle_login_action(data: LoginData) -> LoginActionResponse:
         "type": "refresh"
     }
     refresh_token = jwt.encode(refresh_claims, settings.JWT_SECRET_KEY, algorithm="HS256")
-    
-    return LoginActionResponse(
-        accessToken=access_token,
-        refeshToken=refresh_token
+    user_id = current_account.user_id
+    role = current_account.role
+
+    print(f"Generated tokens for user_id: {user_id} with role: {role}")
+
+    return Result.ok(
+        data=LoginActionResponse(
+            accessToken=access_token,
+            refeshToken=refresh_token
+        )
     )

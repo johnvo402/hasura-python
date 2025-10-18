@@ -34,7 +34,7 @@ class CurrentAccount:
 
     @property
     def role(self) -> str:
-        return self._context.get('role', 'any')
+        return self._context.get('role', 'anonymous')
 
     @property
     def is_authenticated(self) -> bool:

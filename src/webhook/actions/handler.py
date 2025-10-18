@@ -51,9 +51,10 @@ async def action_handler(request: Request, payload: BaseActionPayload):
         # Call the specific handler
         result = await handler(action_data)
         
-        # Calculate duration and log success
+        # Calculate duration
         duration_ms = (time.time() - start_time) * 1000
-       
+    
+            
         return result
         
     except Exception as e:

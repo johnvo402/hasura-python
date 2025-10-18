@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Header, HTTPException
+from fastapi.responses import JSONResponse
 import os
 from datetime import datetime, timedelta
 import jwt
@@ -8,11 +9,6 @@ from .auth import verify_token_handler
 
 router = APIRouter()
 
-# Environment variables
-HASURA_ADMIN_SECRET = os.getenv("HASURA_ADMIN_SECRET", "myadminsecretkey")
-WEBHOOK_SECRET = os.getenv("HASURA_WEBHOOK_SECRET", "supersecret")
-HASURA_ENDPOINT = os.getenv("HASURA_ENDPOINT", "http://hasura:8080/v1/graphql")
-
 # ---------- Hasura webhook routes ----------
 @router.post("/verify-token")
 async def verify_token(request: Request):
@@ -21,7 +17,10 @@ async def verify_token(request: Request):
 # ---------- Action routes ----------
 @router.post("/action")
 async def handle_action(request: Request, payload: BaseActionPayload):
-    return await action_handler(request, payload)
+    response = await action_handler(request, payload)
+    if not response.success:
+        return JSONResponse(content=response.error, status_code=response.status_code)
+    return response.data
 
 # ---------- Event trigger handler ----------
 @router.post("/events/order_insert")

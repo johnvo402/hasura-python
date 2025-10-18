@@ -22,15 +22,10 @@ async def verify_token_handler(request: Request):
             if isinstance(body, dict) and 'headers' in body:
                 body_headers = body['headers']
                 auth_header = body_headers.get('authorization') or body_headers.get('Authorization')
-                if auth_header:
-                    print("Found token in request body headers")
-                else:
-                    print("No token found in request body headers")
             
         if not auth_header:
-            print("No Authorization found in headers or body. Headers:", dict(request.headers))
+            current_account.clear_context()
             return {
-                "hasura-client-no-auth": "true",
                 "x-hasura-role": "anonymous",
             }
         
@@ -60,31 +55,27 @@ async def verify_token_handler(request: Request):
                 'role': account.role
             }
             
-            # Set the current account context
             current_account.init_context(account_data)
-            
-            # Return the Hasura session variables
             return {
                 "x-hasura-role": account_data['role'],
                 "x-hasura-user-id": account_data['user_id'],
                 "x-hasura-email": account_data['email'],
                 "x-hasura-username": account_data['username'],
-                # You can add more custom claims here
             }
         finally:
             db.close()
     except jwt.ExpiredSignatureError:
-        print("Token has expired")
+        current_account.clear_context()
         return {
             "x-hasura-role": "anonymous",
         }
     except jwt.InvalidTokenError:
-        print("Invalid token")
+        current_account.clear_context()
         return {
             "x-hasura-role": "anonymous",
         }
     except Exception as e:
-        print(f"Error in verify_token_handler: {str(e)}")
+        current_account.clear_context()
         return {
             "x-hasura-role": "anonymous",
         }

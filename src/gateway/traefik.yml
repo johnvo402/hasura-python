@@ -7,7 +7,7 @@ entryPoints:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: kha.tran@nexlab.tech
+      email: thanhthu040202@gmail.com
       storage: /letsencrypt/acme.json
       httpChallenge:
         entryPoint: web

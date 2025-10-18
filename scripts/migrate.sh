@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -eo pipefail
 
@@ -22,7 +22,7 @@ http_wait() {
   exit 1
 }
 
-CONTROLLER_HOST=${CONTROLLER_URL%"/v1/graphql"}
+HASURA_HOST=${HASURA_BASE_URL%"/v1/graphql"}
 
 migrate_server() {
   ssh -A "$REMOTE_SERVER_USER@$REMOTE_SERVER_IP" "cd s3-backend
@@ -34,13 +34,13 @@ migrate_server() {
 migrate_local() {
   cd $ROOT/services/controller
 
-  # hasura metadata reload --skip-update-check --admin-secret $CONTROLLER_ADMIN_SECRET --endpoint $CONTROLLER_HOST
-  hasura migrate apply --skip-update-check --all-databases --admin-secret $CONTROLLER_ADMIN_SECRET --endpoint $CONTROLLER_HOST
-  # hasura metadata reload --skip-update-check --admin-secret $CONTROLLER_ADMIN_SECRET --endpoint $CONTROLLER_HOST
-  hasura metadata apply --skip-update-check --admin-secret $CONTROLLER_ADMIN_SECRET --endpoint $CONTROLLER_HOST
+  # hasura metadata reload --skip-update-check --admin-secret $HASURA_ADMIN_SECRET --endpoint $HASURA_HOST
+  hasura migrate apply --skip-update-check --all-databases --admin-secret $HASURA_ADMIN_SECRET --endpoint $HASURA_HOST
+  # hasura metadata reload --skip-update-check --admin-secret $HASURA_ADMIN_SECRET --endpoint $HASURA_HOST
+  hasura metadata apply --skip-update-check --admin-secret $HASURA_ADMIN_SECRET --endpoint $HASURA_HOST
 }
 
-http_wait "${CONTROLLER_HOST}/healthz"
+http_wait "${HASURA_HOST}/healthz"
 
 case "${DEV}" in
   true)
