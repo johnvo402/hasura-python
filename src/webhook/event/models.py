@@ -17,7 +17,6 @@ class EventContent(BaseModel):
 
 
 class TableInfo(BaseModel):
-    schema: str
     name: str
 
 

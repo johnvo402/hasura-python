@@ -1,1 +1,6 @@
-[]
+- name: test_cron
+  webhook: '{{WEBHOOK_BASE_URL}}/scheduled'
+  schedule: '* * * * *'
+  include_in_metadata: true
+  payload: {}
+  comment: ""
