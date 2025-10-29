@@ -1,6 +1,6 @@
 .EXPORT_ALL_VARIABLES:
 
-REGISTRY ?= nexlab
+REGISTRY ?= thanhthu
 PROJECT ?= hasura-python
 VERSION ?= $(shell date +"%Y%m%d")
 TAG ?= $(shell git describe --tags --always --dirty)

@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = "postgrespassword"
     
     # JWT settings
-    JWT_ISSUER: str = "https://nexlab.tech"
+    JWT_ISSUER: str = "https://thanhthu.vn"
     JWT_CHECKSUM: bool = True
     JWT_SECRET_KEY: str = "your-256-bit-secret"
     JWT_AUDIENCE: str = "hasura"
