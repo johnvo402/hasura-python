@@ -1,7 +1,7 @@
 services:
   postgres:
     container_name: postgres
-    image: postgis/postgis:14-master
+    image: postgres:15
     restart: always
     labels:
       - "traefik.enable=false"
@@ -13,10 +13,6 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./scripts/docker-entrypoint-initdb.d/000_createdb.sql:/docker-entrypoint-initdb.d/000_createdb.sql
-    logging:
-      driver: gelf
-      options:
-        gelf-address: "udp://localhost:12201"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     shm_size: ${POSTGRES_SHM_SIZE}

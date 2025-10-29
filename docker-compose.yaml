@@ -8,8 +8,6 @@ services:
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      # - --log.level=DEBUG
-      # - "--api.insecure=true"
     ports:
       - "80:80"
     volumes:
