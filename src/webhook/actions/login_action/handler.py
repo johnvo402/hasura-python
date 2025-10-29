@@ -12,13 +12,16 @@ from ...models.account import Account
 from ...config import settings
 # from ...auth.context import current_account
 from ...utils.result import Result
+from ..models import BaseActionPayload
 
 
 logger = get_logger(__name__)
 
-async def handle_login_action(data: LoginData) -> Result[LoginActionResponse]:
+async def handle_login_action(data: BaseActionPayload) -> Result[LoginActionResponse]:
     """Handle login action"""
     
+    login_data = LoginData(**data.input["data"])
+        
     with next(get_db()) as db:
         # Query user from database with specific fields
         stmt = select(
@@ -26,7 +29,7 @@ async def handle_login_action(data: LoginData) -> Result[LoginActionResponse]:
             Account.username,
             Account.password_hash,
             Account.is_active
-        ).where(Account.username == data.username)
+        ).where(Account.username == login_data.username)
         user = db.execute(stmt).first()
         # Check if user exists and validate credentials
         if not user:
@@ -40,7 +43,7 @@ async def handle_login_action(data: LoginData) -> Result[LoginActionResponse]:
         user_id, username, password_hash, is_active = user
         
         # Verify password (assuming verify_password is a static method in Account)
-        if not Account.verify_password_hash(password_hash, data.password):
+        if not Account.verify_password_hash(password_hash, login_data.password):
             return Result.fail(
                 message="Invalid username or password",
                 code=401,

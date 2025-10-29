@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from ..pkgs import SessionVariable
 
 # Base action models
 class ActionMetadata(BaseModel):
@@ -8,6 +9,7 @@ class ActionMetadata(BaseModel):
 class BaseActionPayload(BaseModel):
     action: ActionMetadata
     input: dict
+    session_variables: SessionVariable
     
 class ActionExtensionResponse(BaseModel):
     location: Optional[str] = None

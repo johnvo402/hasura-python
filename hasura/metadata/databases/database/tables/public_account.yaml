@@ -85,3 +85,14 @@ delete_permissions:
     permission:
       filter: {}
     comment: ""
+event_triggers:
+  - name: create_account
+    definition:
+      enable_manual: false
+      insert:
+        columns: '*'
+    retry_conf:
+      interval_sec: 10
+      num_retries: 0
+      timeout_sec: 60
+    webhook: '{{WEBHOOK_BASE_URL}}/event'
