@@ -3,47 +3,75 @@
 set -eo pipefail
 
 ROOT="$(dirname "${BASH_SOURCE[0]}")/.."
-cd $ROOT
+cd "$ROOT"
+
 DB="database"
-POSTGRES_EXEC="docker compose exec postgres"
+POSTGRES_HOST="${POSTGRES_HOST:-postgres}"  # Default if not set
+POSTGRES_USER="${POSTGRES_USER:-postgres}"
+POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-}"
+REMOTE_SERVER_USER="${REMOTE_SERVER_USER:-}"
+REMOTE_SERVER_IP="${REMOTE_SERVER_IP:-}"
+REMOTE_SERVER_PORT="${REMOTE_SERVER_PORT:-22}"
+
+# Ensure required vars are set
+require_var() {
+  local var_name="$1"
+  local var_value="${!var_name}"
+  if [[ -z "$var_value" ]]; then
+    echo "Error: $var_name is required." >&2
+    exit 1
+  fi
+}
 
 backup() {
-   local filepath="$ROOT/.pgdump/$DB.sql"
-    rm -f $filepath
-      DB_NAME=$DB
-      ;;
-    esac
+  local filepath="$ROOT/.pgdump/$DB.sql"
+  mkdir -p "$ROOT/.pgdump"
+  rm -f "$filepath"
 
-    echo "START backup $DB"
-    docker exec -i postgres /bin/bash -c "PGPASSWORD=$POSTGRES_PASSWORD pg_dump --username $POSTGRES_USER $DB_NAME" >$filepath
-    #PGPASSWORD=$POSTGRES_PASSWORD pg_dump --host=$BACKUP_HOST --port=$BACKUP_PORT --username=$POSTGRES_USER --dbname=$DB_NAME > $filepath
-    echo "END backup $DB"
-    printf "\n"
+  require_var POSTGRES_PASSWORD
+  require_var POSTGRES_USER
+
+  echo "START backup $DB"
+  docker exec -e PGPASSWORD="$POSTGRES_PASSWORD" "$POSTGRES_HOST" pg_dump -U "$POSTGRES_USER" -d "$DB" > "$filepath"
+  echo "END backup $DB"
+  echo
 }
 
 sql() {
-  scp -r -P $REMOTE_SERVER_PORT $REMOTE_SERVER_USER@$REMOTE_SERVER_IP:~/hasura-python/.pgdump .
+  require_var REMOTE_SERVER_USER
+  require_var REMOTE_SERVER_IP
+  require_var REMOTE_SERVER_PORT
+
+  echo "Fetching .pgdump from remote server..."
+  scp -P "$REMOTE_SERVER_PORT" -r \
+    "$REMOTE_SERVER_USER@$REMOTE_SERVER_IP:~/hasura-python/.pgdump" .
+  echo "Download complete."
 }
 
 restore() {
-  DB_NAME=$DB
-      ;;
-    esac
-    echo "START restore $DB"
-    $POSTGRES_EXEC sh -c "psql -U $POSTGRES_USER -d $DB_NAME < /backup/$DB.sql"
-    echo "END restore $DB"
-    printf "\n"
+  local filepath="/backup/$DB.sql"
+
+  echo "START restore $DB"
+  docker exec -e PGPASSWORD="$POSTGRES_PASSWORD" database sh -c "psql -U $POSTGRES_USER -d $DB < /backup/$POSTGRES.sql"
+  echo "END restore $DB"
+  echo
 }
 
 case "$1" in
-backup)
-  backup
-  ;;
-sql)
-  sql
-  ;;
-restore)
-  restore
-  ;;
-*) ;;
+  backup)
+    backup
+    ;;
+  sql)
+    sql
+    ;;
+  restore)
+    restore
+    ;;
+  *)
+    echo "Usage: $0 {backup|sql|restore}"
+    echo "  backup  - Dump database to .pgdump/$DB.sql"
+    echo "  sql     - Download .pgdump from remote server"
+    echo "  restore - Restore database from /backup/$DB.sql in container"
+    exit 1
+    ;;
 esac
