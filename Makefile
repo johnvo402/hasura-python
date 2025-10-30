@@ -14,20 +14,20 @@ args=$(filter-out $@,$(MAKECMDGOALS))
 export
 
 
-postgres:
-	docker compose -f docker-compose.yaml -f docker-compose.postgres.yaml up -d postgres
+database:
+	docker compose -f docker-compose.yaml -f docker-compose.database.yaml up -d database
 
 dev:
-	docker compose -f docker-compose.yaml -f docker-compose.postgres.yaml -f docker-compose.dev.yaml up -d ${SERVICE}
+	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml up -d ${SERVICE}
 
 dev-build:
-	docker compose -f docker-compose.yaml -f docker-compose.postgres.yaml -f docker-compose.dev.yaml up -d --build ${SERVICE}
+	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml up -d --build ${SERVICE}
 
 staging:
-	docker compose -f docker-compose.yaml -f docker-compose.postgres.yaml -f docker-compose.staging.yaml up -d --build ${SERVICE}
+	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.staging.yaml up -d --build ${SERVICE}
 
 clean:
-	docker compose -f docker-compose.yaml -f docker-compose.postgres.yaml -f docker-compose.dev.yaml down --remove-orphans -v
+	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml down --remove-orphans -v
 
 
 restart:
@@ -37,7 +37,7 @@ logs:
 	docker-compose logs -f docker-compose.yaml -f docker-compose.dev.yaml $(args)
 
 down:
-	docker compose -f docker-compose.yaml -f docker-compose.postgres.yaml -f docker-compose.dev.yaml down ${SERVICE}
+	docker compose -f docker-compose.yaml -f docker-compose.database.yaml -f docker-compose.dev.yaml down ${SERVICE}
 
 console:
 	./scripts/console.sh
