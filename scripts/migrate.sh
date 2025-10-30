@@ -25,14 +25,14 @@ http_wait() {
 HASURA_HOST=${HASURA_BASE_URL%"/v1/graphql"}
 
 migrate_server() {
-  ssh -A "$REMOTE_SERVER_USER@$REMOTE_SERVER_IP" "cd s3-backend
-    git checkout $REMOTE_SERVER_BRANH
-    git fetch origin && git reset --hard origin/$REMOTE_SERVER_BRANH && git clean -f -d
+  ssh -A "$REMOTE_SERVER_USER@$REMOTE_SERVER_IP" "cd hasura-python
+    git checkout $REMOTE_SERVER_BRANCH
+    git fetch origin && git reset --hard origin/$REMOTE_SERVER_BRANCH && git clean -f -d
     make migrate"
 }
 
 migrate_local() {
-  cd $ROOT/services/controller
+  cd $ROOT/hasura
 
   # hasura metadata reload --skip-update-check --admin-secret $HASURA_ADMIN_SECRET --endpoint $HASURA_HOST
   hasura migrate apply --skip-update-check --all-databases --admin-secret $HASURA_ADMIN_SECRET --endpoint $HASURA_HOST

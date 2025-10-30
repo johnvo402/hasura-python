@@ -1,12 +1,11 @@
 services:
   database:
-    container_name: database
+    container_name: ${POSTGRES_HOST}
     image: postgres:15
     restart: always
     labels:
       - "traefik.enable=false"
     command:
-      - "-cshared_preload_libraries=postgis-3,pg_stat_statements"
       - "-cpg_stat_statements.max=10000"
       - "-cpg_stat_statements.track=all"
       - "-cmax_connections=200"
@@ -23,9 +22,9 @@ services:
     depends_on:
       - "database"
     environment:
-      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@database:5432/postgres
-      DATA_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@database:5432/postgres
-      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@database:5432/database
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres
+      DATA_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB_NAME}
 
 volumes:
   db_data:

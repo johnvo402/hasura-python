@@ -22,7 +22,7 @@ backup() {
 }
 
 sql() {
-  scp -r -P $REMOTE_SERVER_PORT $REMOTE_SERVER_USER@$REMOTE_SERVER_IP:~/s3-backend/.pgdump .
+  scp -r -P $REMOTE_SERVER_PORT $REMOTE_SERVER_USER@$REMOTE_SERVER_IP:~/hasura-python/.pgdump .
 }
 
 restore() {

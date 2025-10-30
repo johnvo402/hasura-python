@@ -4,7 +4,7 @@ set -eo pipefail
 
 DB_DEFAULT=${1:-"database"}
 HASURA_HOST=${HASURA_BASE_URL%"/v1/graphql"}
-FILE_PATH=$(ls ./services/controller/migrations/$DB_DEFAULT | sort -n | tail -n 1)
+FILE_PATH=$(ls ./hasura/migrations/$DB_DEFAULT | sort -n | tail -n 1)
 
 if [[ -n $2 ]]; then
   VERSION=$2

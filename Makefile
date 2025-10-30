@@ -61,6 +61,6 @@ migrate:
 pgdump:
 	./scripts/pgdump.sh $(args)
 
-.PHONY: scripts
-scripts:
-	./scripts/script.sh ${NAME}
+.PHONY: test
+test:
+	./scripts/test.sh ${NAME}
