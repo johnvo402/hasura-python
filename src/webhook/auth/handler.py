@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import os
 import jwt
 from fastapi import Request
+from sqlalchemy import select
 
         # Fetch user data from database
 from ..models.account import Account
@@ -42,15 +43,32 @@ async def verify_token_handler(request: Request):
 
         db = SessionLocal()
         try:
-            account = db.query(Account).filter(Account.id == user_id).first()
+            stmt = select(
+                    Account.id,
+                    Account.username,
+                    Account.email,
+                    Account.full_name,
+                    Account.is_active,
+                    Account.role
+                ).where(Account.id == user_id)
+            
+            account = db.execute(stmt).first()
+           
             if not account:
                 return {"message": "User not found in database"}
-
+            
+            email, full_name, username, is_active, role = account
+            
+            if not is_active:
+                return {"message": "Account inactive"}
+            
+            
             account_data = {
                 'user_id': str(account.id),
-                'email': account.email,
-                'username': account.username,
-                'role': account.role
+                'email': email,
+                'username': username,
+                'role': role,
+                'full_name': full_name,
             }
             
             return {
@@ -58,6 +76,7 @@ async def verify_token_handler(request: Request):
                 "x-hasura-user-id": account_data['user_id'],
                 "x-hasura-email": account_data['email'],
                 "x-hasura-username": account_data['username'],
+                "x-hasura-full_name": account_data['full_name'],
             }
         finally:
             db.close()
