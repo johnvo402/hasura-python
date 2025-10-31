@@ -11,10 +11,12 @@ from .scheduled import ScheduleModel, schedule_handler
 
 router = APIRouter()
 
+
 # ---------- Hasura webhook routes ----------
 @router.post("/verify-token")
 async def verify_token(request: Request):
     return await verify_token_handler(request)
+
 
 # ---------- Action routes ----------
 @router.post("/action")
@@ -24,6 +26,7 @@ async def handle_action(request: Request, payload: BaseActionPayload):
         return JSONResponse(content=response.error, status_code=response.status_code)
     return response.data
 
+
 # ---------- Event trigger handler ----------
 @router.post("/event")
 async def handle_event(request: Request, payload: BaseEventPayload):
@@ -32,6 +35,7 @@ async def handle_event(request: Request, payload: BaseEventPayload):
         return JSONResponse(content=response.error, status_code=response.status_code)
     return response.data
 
+
 # ---------- Scheduled event handler ----------
 @router.post("/scheduled")
 async def scheduled_run(payload: ScheduleModel):
@@ -39,3 +43,10 @@ async def scheduled_run(payload: ScheduleModel):
     if not response.success:
         return JSONResponse(content=response.error, status_code=response.status_code)
     return response.data
+
+
+@router.get("/health")
+def health_check():
+    return JSONResponse(
+        content={"status": "ok", "message": "FastAPI is running"}, status_code=200
+    )
